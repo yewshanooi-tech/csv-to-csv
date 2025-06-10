@@ -28,12 +28,12 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return make_response("<script>alert('No file part'); window.location.href='/';</script>")
+        return make_response("<script>alert('No file part.'); window.location.href='/';</script>")
 
     file = request.files['file']
 
     if not file.filename or not isinstance(file.filename, str):
-        return make_response("<script>alert('No file uploaded'); window.location.href='/';</script>")
+        return make_response("<script>alert('No file uploaded. Please upload a .csv file.'); window.location.href='/';</script>")
 
     if file.filename.endswith('.csv'):
         filepath = os.path.join(app.config['IMPORTS_FOLDER'], str(file.filename))
@@ -54,6 +54,7 @@ def upload_file():
 
             {'source': 'Lineitem name', 'target': 'Description of Product or Service'},
             {'source': 'Lineitem price', 'target': 'Unit Price'},
+            {'source': 'Lineitem quantity', 'target': 'Quantity'},
             {'source': 'Subtotal', 'target': 'Subtotal excluding taxes discounts & charges'},
             {'source': 'Total', 'target': 'Total Excluding Tax on Line Level'},
 
@@ -71,7 +72,6 @@ def upload_file():
             "Supplier's Registration Number": "201501029070",
             "Supplier's E-mail": "accounts@bloomthis.co",
             "Supplier's MSIC code": "47734",
-            # "Supplier's Business Activity Description": "Retail sale of flowers, plants, seeds, fertilizers",
             "Supplier's Address Line 1": "9, Lorong 51A/227C, Seksyen 51A",
             "Supplier's City Name": "Petaling Jaya",
             "Supplier's State": "Selangor",
@@ -96,7 +96,7 @@ def upload_file():
                         # Mapping for Financial Status:Document Type
                         if column == 'Document Type' and source_column == 'Financial Status':
                             mapped_df[column] = uploaded_df[source_column].map(
-                                {'paid': 'invoice', 'refunded': 'refund note'}).fillna('')
+                                {'paid': 'Invoice', 'refunded': 'Refund Note'}).fillna('')
                         else:
                             mapped_df[column] = uploaded_df[source_column]
                         break
@@ -126,7 +126,7 @@ def upload_file():
 
 
         return redirect(url_for('index'))
-    return make_response("<script>alert('Invalid file format'); window.location.href='/';</script>")
+    return make_response("<script>alert('Invalid file format. Please upload a .csv file.'); window.location.href='/';</script>")
 
 if __name__ == '__main__':
     if not os.path.exists(app.config['IMPORTS_FOLDER']):
