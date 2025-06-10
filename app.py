@@ -43,6 +43,28 @@ def upload_file():
             {'source': 'Total', 'target': 'Invoice Total Payable Amount'}
         ]
 
+        # Define default values for target columns
+        default_values = {
+            "Supplier's Name": "BloomThis Flora Sdn. Bhd.",
+            "Supplier's TIN": "C24046757040",
+            "Supplier's Registration Type": "BRN",
+            "Supplier's Registration Number": "201501029070",
+            # "Supplier's e-mail": "accounts@bloomthis.co",
+            "Supplier's MSIC code": "47734",
+            # "Supplier's Business Activity Description": "Retail sale of flowers, plants, seeds, fertilizers",
+            "Supplier's Address Line 1": "9, Lorong 51A/227C, Seksyen 51A",
+            "Supplier's City Name": "Petaling Jaya",
+            "Supplier's State": "Selangor",
+            "Supplier's Country": "Malaysia",
+            "Supplier's Contact Number": "+60162992263",
+
+            "Classification": "008",
+            "Tax Type": "E",
+            "Tax Amount": "0",
+
+            "Invoice Total Tax Amount": "0"
+        }
+
         # Dynamic mapping logic
         mapped_df = pd.DataFrame()
         for column in columns_df.columns:
@@ -53,15 +75,26 @@ def upload_file():
                         mapped_df[column] = uploaded_df[source_column]
                         break  # Map the first matching source column
             else:
-                mapped_df[column] = None  # Handle missing columns gracefully
+                # Ensure default values are applied correctly
+                mapped_df[column] = default_values.get(column, None)
+
+        # Fill missing columns with default values explicitly
+        for default_column, default_value in default_values.items():
+            if default_column not in mapped_df.columns:
+                mapped_df[default_column] = default_value
+            else:
+                # Replace inplace=True with explicit assignment
+                mapped_df[default_column] = mapped_df[default_column].fillna(default_value)
 
         # Ensure output folder exists
         if not os.path.exists(app.config['EXPORTS_FOLDER']):
             os.makedirs(app.config['EXPORTS_FOLDER'])
 
         # Save the mapped data to a new file
-        output_filename = f"{os.path.splitext(file.filename)[0]}_mapped.csv"
-        mapped_df.to_csv(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False)
+        output_filename = f"{os.path.splitext(file.filename)[0]}_mapped.xlsx"
+        mapped_df.to_excel(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False, engine='openpyxl')
+        # output_filename = f"{os.path.splitext(file.filename)[0]}_mapped.csv"
+        # mapped_df.to_csv(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False)
 
         return redirect(url_for('index'))
     return make_response("<script>alert('Invalid file format'); window.location.href='/';</script>")

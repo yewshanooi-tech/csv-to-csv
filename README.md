@@ -1,10 +1,6 @@
-# CSV to CSV
+# CSV to XLSX
 
-This project is a Python Flask-based website where users can upload .csv files from Shopify and map relevant columns to a final.csv file.
-
-## Features
-- Upload .csv files
-- Map columns to a final.csv file
+This project is a Python Flask-based website where users can upload .csv files from Shopify and map relevant columns to a .xlsx file.
 
 ## Setup
 1. Create a virtual environment using `python -m venv .venv`.
