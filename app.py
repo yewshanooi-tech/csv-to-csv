@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response, send_file
 import os
 import pandas as pd
+import time
 
 app = Flask(__name__)
 app.config['IMPORTS_FOLDER'] = os.path.join(os.getcwd(), 'data', 'imports')
@@ -39,9 +40,10 @@ def upload_file():
         filepath = os.path.join(app.config['IMPORTS_FOLDER'], str(file.filename))
         file.save(filepath)
 
+        start_time = time.time()
+
         # Clean the uploaded CSV file before mapping
         cleaned_filepath = clean_csv(filepath)
-
         uploaded_df = pd.read_csv(cleaned_filepath)
         columns_df = pd.read_csv(os.path.join('templates', 'columns.csv'))
 
@@ -130,8 +132,10 @@ def upload_file():
         # output_filename = f"{os.path.splitext(os.path.basename(cleaned_filepath))[0]}_mapped.csv"
         # mapped_df.to_csv(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False)
 
+        runtime = round(time.time() - start_time, 3)
 
-        return render_template('index.html', download_url=url_for('download_file', filename=output_filename))
+
+        return render_template('index.html', download_url=url_for('download_file', filename=output_filename), runtime=runtime)
     return make_response("<script>alert('Invalid file format. Please upload a .csv file.'); window.location.href='/';</script>")
 
 @app.route('/download/<filename>')
