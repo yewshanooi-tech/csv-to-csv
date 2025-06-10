@@ -6,6 +6,21 @@ app = Flask(__name__)
 app.config['IMPORTS_FOLDER'] = os.path.join(os.getcwd(), 'data', 'imports')
 app.config['EXPORTS_FOLDER'] = os.path.join(os.getcwd(), 'data', 'exports')
 
+
+def clean_csv(filepath):
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Replace Line Separator and Paragraph Separator with newlines
+    content = content.replace("\u2028", "\n").replace("\u2029", "\n")
+
+    cleaned_filepath = f"{os.path.splitext(filepath)[0]}_cleaned.csv"
+    with open(cleaned_filepath, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    return cleaned_filepath
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -24,7 +39,10 @@ def upload_file():
         filepath = os.path.join(app.config['IMPORTS_FOLDER'], str(file.filename))
         file.save(filepath)
 
-        uploaded_df = pd.read_csv(filepath)
+        # Clean the uploaded CSV file before mapping
+        cleaned_filepath = clean_csv(filepath)
+
+        uploaded_df = pd.read_csv(cleaned_filepath)
         columns_df = pd.read_csv(os.path.join('templates', 'columns.csv'))
 
 
@@ -101,9 +119,9 @@ def upload_file():
 
 
         # Save the mapped data to a new file
-        output_filename = f"{os.path.splitext(file.filename)[0]}_mapped.xlsx"
+        output_filename = f"{os.path.splitext(os.path.basename(cleaned_filepath))[0]}_mapped.xlsx"
         mapped_df.to_excel(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False, engine='openpyxl')
-        # output_filename = f"{os.path.splitext(file.filename)[0]}_mapped.csv"
+        # output_filename = f"{os.path.splitext(os.path.basename(cleaned_filepath))[0]}_mapped.csv"
         # mapped_df.to_csv(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False)
 
 
