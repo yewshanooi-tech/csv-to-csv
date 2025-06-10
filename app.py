@@ -24,12 +24,13 @@ def upload_file():
         filepath = os.path.join(app.config['IMPORTS_FOLDER'], str(file.filename))
         file.save(filepath)
 
-        # Process the uploaded file
         uploaded_df = pd.read_csv(filepath)
         columns_df = pd.read_csv(os.path.join('templates', 'columns.csv'))
 
-        # Define a mapping between uploaded file columns and columns.csv using a list structure
+
+        # Column Mappings (source:target)
         column_mapping = [
+            {'source': 'Financial Status', 'target': 'Document Type'},
             {'source': 'Name', 'target': 'Document Number'},
             {'source': 'Currency', 'target': 'Document Currency Code'},
 
@@ -43,13 +44,14 @@ def upload_file():
             {'source': 'Total', 'target': 'Invoice Total Payable Amount'}
         ]
 
-        # Define default values for target columns
+
+        # Default Column Values (target)
         default_values = {
             "Supplier's Name": "BloomThis Flora Sdn. Bhd.",
             "Supplier's TIN": "C24046757040",
             "Supplier's Registration Type": "BRN",
             "Supplier's Registration Number": "201501029070",
-            # "Supplier's e-mail": "accounts@bloomthis.co",
+            "Supplier's E-mail": "accounts@bloomthis.co",
             "Supplier's MSIC code": "47734",
             # "Supplier's Business Activity Description": "Retail sale of flowers, plants, seeds, fertilizers",
             "Supplier's Address Line 1": "9, Lorong 51A/227C, Seksyen 51A",
@@ -65,6 +67,7 @@ def upload_file():
             "Invoice Total Tax Amount": "0"
         }
 
+
         # Dynamic mapping logic
         mapped_df = pd.DataFrame()
         for column in columns_df.columns:
@@ -72,29 +75,37 @@ def upload_file():
             if matching_sources:
                 for source_column in matching_sources:
                     if source_column in uploaded_df.columns:
-                        mapped_df[column] = uploaded_df[source_column]
-                        break  # Map the first matching source column
+                        # Mapping for Financial Status:Document Type
+                        if column == 'Document Type' and source_column == 'Financial Status':
+                            mapped_df[column] = uploaded_df[source_column].map(
+                                {'paid': 'invoice', 'refunded': 'refund note'}).fillna('')
+                        else:
+                            mapped_df[column] = uploaded_df[source_column]
+                        break
             else:
                 # Ensure default values are applied correctly
                 mapped_df[column] = default_values.get(column, None)
 
-        # Fill missing columns with default values explicitly
+
+        # Fill missing columns with default values
         for default_column, default_value in default_values.items():
             if default_column not in mapped_df.columns:
                 mapped_df[default_column] = default_value
             else:
-                # Replace inplace=True with explicit assignment
                 mapped_df[default_column] = mapped_df[default_column].fillna(default_value)
+
 
         # Ensure output folder exists
         if not os.path.exists(app.config['EXPORTS_FOLDER']):
             os.makedirs(app.config['EXPORTS_FOLDER'])
+
 
         # Save the mapped data to a new file
         output_filename = f"{os.path.splitext(file.filename)[0]}_mapped.xlsx"
         mapped_df.to_excel(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False, engine='openpyxl')
         # output_filename = f"{os.path.splitext(file.filename)[0]}_mapped.csv"
         # mapped_df.to_csv(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False)
+
 
         return redirect(url_for('index'))
     return make_response("<script>alert('Invalid file format'); window.location.href='/';</script>")
