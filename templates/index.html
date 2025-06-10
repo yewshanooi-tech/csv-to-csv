@@ -32,10 +32,11 @@
         }
         form {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             margin-top: 20px;
             margin-bottom: 20px;
+            gap: 10px;
         }
         input[type="file"] {
             margin-bottom: 0;
@@ -44,7 +45,6 @@
             border-radius: 5px;
         }
         button {
-            margin-left: 10px;
             background-color: #007bff;
             color: #fff;
             border: none;
@@ -68,7 +68,7 @@
         .btn-success:hover {
             background-color: #218838;
         }
-        div {
+        .margins {
             margin-top: 20px;
             margin-bottom: 20px;
         }
@@ -80,11 +80,13 @@
         <p>Upload your Shopify .csv file and click 'Convert' to process and map the data into a new .xlsx file.</p>
         <form action="/upload" method="post" enctype="multipart/form-data">
             <input type="file" name="file" accept=".csv">
-            <button type="submit"><i class="fas fa-upload"></i> Convert</button>
+            <button type="submit">Convert</button>
         </form>
         {% if download_url %}
-        <div class="text-center mt-3">
-            <a href="{{ download_url }}" class="btn btn-success btn-lg">Download Processed File</a>
+        <div class="text-center mt-3 margins">
+            <a href="{{ download_url }}" class="btn btn-success btn-lg">
+                <i class="fa-solid fa-download" style="margin-right: 5px;"></i> Download Processed File
+            </a>
         </div>
         {% endif %}
     </div>
