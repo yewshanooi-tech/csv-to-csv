@@ -50,6 +50,8 @@ def upload_file():
         column_mapping = [
             {'source': 'Financial Status', 'target': 'Document Type'},
             {'source': 'Name', 'target': 'Document Number'},
+            {'source': 'Paid at', 'target': 'Document Date'},
+            {'source': 'Paid at', 'target': 'Document Time'},
             {'source': 'Currency', 'target': 'Document Currency Code'},
 
             {'source': 'Lineitem name', 'target': 'Description of Product or Service'},
@@ -97,6 +99,10 @@ def upload_file():
                         if column == 'Document Type' and source_column == 'Financial Status':
                             mapped_df[column] = uploaded_df[source_column].map(
                                 {'paid': 'Invoice', 'refunded': 'Refund Note'}).fillna('')
+                        elif column == 'Document Date' or column == 'Document Time':
+                            if source_column == 'Paid at':
+                                mapped_df['Document Date'] = uploaded_df[source_column].str.split(' ').str[0]
+                                mapped_df['Document Time'] = uploaded_df[source_column].str.split(' ').str[1]
                         else:
                             mapped_df[column] = uploaded_df[source_column]
                         break
