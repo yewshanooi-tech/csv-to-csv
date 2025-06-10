@@ -56,6 +56,22 @@
         button:hover {
             background-color: #0056b3;
         }
+        .btn-success {
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        div {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -66,6 +82,11 @@
             <input type="file" name="file" accept=".csv">
             <button type="submit"><i class="fas fa-upload"></i> Convert</button>
         </form>
+        {% if download_url %}
+        <div class="text-center mt-3">
+            <a href="{{ download_url }}" class="btn btn-success btn-lg">Download Processed File</a>
+        </div>
+        {% endif %}
     </div>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, make_response
+from flask import Flask, render_template, request, redirect, url_for, make_response, send_file
 import os
 import pandas as pd
 
@@ -28,7 +28,7 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return make_response("<script>alert('No file part.'); window.location.href='/';</script>")
+        return make_response("<script>alert('No file attachment in request.'); window.location.href='/';</script>")
 
     file = request.files['file']
 
@@ -125,8 +125,17 @@ def upload_file():
         # mapped_df.to_csv(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False)
 
 
-        return redirect(url_for('index'))
+        return render_template('index.html', download_url=url_for('download_file', filename=output_filename))
     return make_response("<script>alert('Invalid file format. Please upload a .csv file.'); window.location.href='/';</script>")
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    filepath = os.path.join(app.config['EXPORTS_FOLDER'], filename)
+
+    if not os.path.exists(filepath):
+        return make_response("<script>alert('File not found.'); window.location.href='/';</script>")
+
+    return send_file(filepath, as_attachment=True)
 
 if __name__ == '__main__':
     if not os.path.exists(app.config['IMPORTS_FOLDER']):
