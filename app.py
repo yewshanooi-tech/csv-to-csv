@@ -60,6 +60,7 @@ def upload_file():
             {'source': 'Lineitem price', 'target': 'Unit Price'},
             {'source': 'Lineitem quantity', 'target': 'Quantity'},
             {'source': 'Subtotal', 'target': 'Subtotal excluding taxes discounts & charges'},
+            {'source': 'Discount Amount', 'target': 'InvoiceLine Discount Amount'},
             {'source': 'Total', 'target': 'Total Excluding Tax on Line Level'},
 
             {'source': 'Total', 'target': 'Invoice Total Amount Excluding Tax'},
@@ -85,6 +86,8 @@ def upload_file():
             "Classification": "008",
             "Tax Type": "E",
             "Tax Amount": "0",
+            "Tax Exemption Reason": "Fresh flowers is exempted as per Customs Sales Tax Order 2022",
+            "Sales tax exemption certificate number special exemption as per Gazette": "Fresh flowers is exempted as per Customs Sales Tax Order 2022",
 
             "Invoice Total Tax Amount": "0"
         }
@@ -114,6 +117,14 @@ def upload_file():
             else:
                 # Ensure default values are applied correctly
                 mapped_df[column] = default_values.get(column, None)
+
+        # Set Original Document Reference Number value as NA based on Document Date
+        if 'Document Type' in mapped_df.columns and 'Document Date' in mapped_df.columns:
+            mapped_df['Original Document Reference Number'] = mapped_df['Original Document Reference Number'].fillna('')
+            mapped_df.loc[
+                (mapped_df['Document Type'] == 'Refund Note') & (pd.to_datetime(mapped_df['Document Date']) < pd.to_datetime('2025-07-01')),
+                'Original Document Reference Number'
+            ] = 'NA'
 
 
         # Fill missing columns with default values
