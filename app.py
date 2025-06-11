@@ -105,6 +105,9 @@ def upload_file():
                             if source_column == 'Created at':
                                 mapped_df['Document Date'] = uploaded_df[source_column].str.split(' ').str[0]
                                 mapped_df['Document Time'] = uploaded_df[source_column].str.split(' ').str[1]
+                        # Calculate Subtotal from Lineitem price * Lineitem quantity
+                        elif column in ['Subtotal excluding taxes discounts & charges', 'Total Excluding Tax on Line Level'] and 'Lineitem price' in uploaded_df.columns and 'Lineitem quantity' in uploaded_df.columns:
+                            mapped_df[column] = uploaded_df['Lineitem price'] * uploaded_df['Lineitem quantity']
                         else:
                             mapped_df[column] = uploaded_df[source_column]
                         break
@@ -121,9 +124,9 @@ def upload_file():
                 mapped_df[default_column] = mapped_df[default_column].fillna(default_value)
 
 
-        # Forward-fill for Document Type, Document Date, Document Time, and Document Currency Code based on Document Number
+        # Forward-fill columns based on Document Number
         mapped_df['Document Type'].replace('', pd.NA, inplace=True)
-        columns_to_fill = ['Document Type', 'Document Date', 'Document Time', 'Document Currency Code']
+        columns_to_fill = ['Document Type', 'Document Date', 'Document Time', 'Document Currency Code', 'Invoice Total Amount Excluding Tax', 'Invoice Total Amount Including Tax', 'Invoice Total Payable Amount']
         mapped_df[columns_to_fill] = mapped_df.groupby('Document Number')[columns_to_fill].transform(lambda group: group.ffill())
 
 
