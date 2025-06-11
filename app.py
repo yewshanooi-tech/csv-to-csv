@@ -52,8 +52,8 @@ def upload_file():
         column_mapping = [
             {'source': 'Financial Status', 'target': 'Document Type'},
             {'source': 'Name', 'target': 'Document Number'},
-            {'source': 'Paid at', 'target': 'Document Date'},
-            {'source': 'Paid at', 'target': 'Document Time'},
+            {'source': 'Created at', 'target': 'Document Date'},
+            {'source': 'Created at', 'target': 'Document Time'},
             {'source': 'Currency', 'target': 'Document Currency Code'},
 
             {'source': 'Lineitem name', 'target': 'Description of Product or Service'},
@@ -100,9 +100,9 @@ def upload_file():
                         # Mapping for Financial Status:Document Type
                         if column == 'Document Type' and source_column == 'Financial Status':
                             mapped_df[column] = uploaded_df[source_column].map(
-                                {'paid': 'Invoice', 'refunded': 'Refund Note'}).fillna('')
+                                {'paid': 'Invoice', 'refunded': 'Refund Note', 'partially_refunded': 'Refund Note'}).fillna('')
                         elif column == 'Document Date' or column == 'Document Time':
-                            if source_column == 'Paid at':
+                            if source_column == 'Created at':
                                 mapped_df['Document Date'] = uploaded_df[source_column].str.split(' ').str[0]
                                 mapped_df['Document Time'] = uploaded_df[source_column].str.split(' ').str[1]
                         else:
@@ -121,7 +121,8 @@ def upload_file():
                 mapped_df[default_column] = mapped_df[default_column].fillna(default_value)
 
 
-        # Forward-fill missing values for rows with the same Document Number
+        # Forward-fill for Document Type, Document Date, Document Time, and Document Currency Code based on Document Number
+        mapped_df['Document Type'].replace('', pd.NA, inplace=True)
         columns_to_fill = ['Document Type', 'Document Date', 'Document Time', 'Document Currency Code']
         mapped_df[columns_to_fill] = mapped_df.groupby('Document Number')[columns_to_fill].transform(lambda group: group.ffill())
 
