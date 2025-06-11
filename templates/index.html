@@ -52,21 +52,23 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
+            transition: background-color 0.2s ease;
         }
         button:hover {
             background-color: #2e2e2e;
         }
         .btn-success {
-            background-color: #28a745;
+            background-color: #198754;
             color: #fff;
             padding: 10px 20px;
             border-radius: 5px;
             text-decoration: none;
             display: inline-block;
             font-size: 14px;
+            transition: background-color 0.2s ease;
         }
         .btn-success:hover {
-            background-color: #25963d;
+            background-color: #157347;
         }
         .margins {
             margin-top: 20px;
@@ -98,7 +100,7 @@
         {% endif %}
         {% if runtime %}
         <footer>
-            <sub>Processed in <b>{{ runtime }}</b> seconds</sub>
+            <sub>Completed in <b>{{ runtime }}</b> seconds</sub>
         </footer>
         {% endif %}
     </div>

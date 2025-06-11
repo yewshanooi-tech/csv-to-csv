@@ -121,6 +121,11 @@ def upload_file():
                 mapped_df[default_column] = mapped_df[default_column].fillna(default_value)
 
 
+        # Forward-fill missing values for rows with the same Document Number
+        columns_to_fill = ['Document Type', 'Document Date', 'Document Time', 'Document Currency Code']
+        mapped_df[columns_to_fill] = mapped_df.groupby('Document Number')[columns_to_fill].transform(lambda group: group.ffill())
+
+
         # Ensure output folder exists
         if not os.path.exists(app.config['EXPORTS_FOLDER']):
             os.makedirs(app.config['EXPORTS_FOLDER'])
