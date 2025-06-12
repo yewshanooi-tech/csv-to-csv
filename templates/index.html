@@ -53,6 +53,8 @@
             cursor: pointer;
             font-size: 14px;
             transition: background-color 0.2s ease;
+            width: 90px; /* Fixed width for upload button */
+            text-align: center;
         }
         button:hover {
             background-color: #2e2e2e;
@@ -81,13 +83,33 @@
         footer sub {
             color: #737373;
         }
+        .spinner {
+            display: none;
+            margin-top: 20px;
+        }
+        .spinner i {
+            font-size: 24px;
+            color: #ffffff;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
+    <script>
+        function showSpinner() {
+            const button = document.querySelector('form button');
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+            button.disabled = true;
+        }
+    </script>
 </head>
 <body>
     <div class="container">
         <h2>CSV to XLSX</h2>
-        <p>Upload your Shopify .csv and click 'Convert' to transfer the data into the ClearTax B2C .xlsx template</p>
-        <form action="/upload" method="post" enctype="multipart/form-data">
+        <p>Upload your Shopify .csv and click 'Convert' to transfer the data into a ClearTax B2C .xlsx template</p>
+        <form action="/upload" method="post" enctype="multipart/form-data" onsubmit="showSpinner()">
             <input type="file" name="file" accept=".csv">
             <button type="submit">Convert</button>
         </form>
