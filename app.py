@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, make_respo
 import os
 import pandas as pd
 import time
+import openpyxl
 
 app = Flask(__name__)
 app.config['IMPORTS_FOLDER'] = os.path.join(os.getcwd(), 'data', 'imports')
@@ -152,14 +153,21 @@ def upload_file():
         mapped_df[columns_to_fill] = mapped_df.groupby('Document Number')[columns_to_fill].transform(lambda group: group.ffill())
 
 
-        if not os.path.exists(app.config['EXPORTS_FOLDER']):
-            os.makedirs(app.config['EXPORTS_FOLDER'])
+        # Autofill directly into B2C Sales -Template-new.xlsx
+        template_path = os.path.join('templates', 'B2C Sales -Template-new.xlsx')
+        workbook = openpyxl.load_workbook(template_path)
+        sheet = workbook.worksheets[0]
+
+        for row_idx, row in enumerate(mapped_df.itertuples(index=False), start=4):
+            for col_idx, value in enumerate(row, start=1):
+                sheet.cell(row=row_idx, column=col_idx, value=value)
 
         output_filename = f"{os.path.splitext(os.path.basename(cleaned_filepath))[0]}_mapped.xlsx"
-        mapped_df.to_excel(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False, engine='openpyxl')
+        output_path = os.path.join(app.config['EXPORTS_FOLDER'], output_filename)
+        workbook.save(output_path)
+
 
         runtime = round(time.time() - start_time, 3)
-
 
         return render_template('index.html', download_url=url_for('download_file', filename=output_filename), runtime=runtime)
     return make_response("<script>alert('Invalid file format. Please upload a .csv file.'); window.location.href='/';</script>")
