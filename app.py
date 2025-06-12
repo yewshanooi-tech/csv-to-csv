@@ -12,7 +12,7 @@ def clean_csv(filepath):
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Replace Line Separator and Paragraph Separator with newlines
+    # Replace line separator and paragraph separator with newlines
     content = content.replace("\u2028", "\n").replace("\u2029", "\n")
 
     cleaned_filepath = f"{os.path.splitext(filepath)[0]}_cleaned.csv"
@@ -25,6 +25,7 @@ def clean_csv(filepath):
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -62,6 +63,7 @@ def upload_file():
             {'source': 'Subtotal', 'target': 'Subtotal excluding taxes discounts & charges'},
             {'source': 'Discount Amount', 'target': 'InvoiceLine Discount Amount'},
             {'source': 'Total', 'target': 'Total Excluding Tax on Line Level'},
+            {'source': 'Total', 'target': 'Amount Exempted from Tax/Taxable Amount'},
 
             {'source': 'Total', 'target': 'Invoice Total Amount Excluding Tax'},
             {'source': 'Total', 'target': 'Invoice Total Amount Including Tax'},
@@ -101,25 +103,30 @@ def upload_file():
             if matching_sources:
                 for source_column in matching_sources:
                     if source_column in uploaded_df.columns:
+                        
                         # Mapping for Financial Status:Document Type
                         if column == 'Document Type' and source_column == 'Financial Status':
                             mapped_df[column] = uploaded_df[source_column].map(
                                 {'paid': 'Invoice', 'refunded': 'Refund Note', 'partially_refunded': 'Refund Note'}).fillna('')
+                        
+                        # Split Created at into Document Date & Document Time
                         elif column == 'Document Date' or column == 'Document Time':
                             if source_column == 'Created at':
                                 mapped_df['Document Date'] = uploaded_df[source_column].str.split(' ').str[0]
                                 mapped_df['Document Time'] = uploaded_df[source_column].str.split(' ').str[1]
+                        
                         # Calculate Subtotal.. from Lineitem price * Lineitem quantity
                         elif column == 'Subtotal excluding taxes discounts & charges' and 'Lineitem price' in uploaded_df.columns and 'Lineitem quantity' in uploaded_df.columns:
                             mapped_df[column] = uploaded_df['Lineitem price'] * uploaded_df['Lineitem quantity']
-                        # Calculate Total.. from Lineitem price - Discount Amount
-                        elif column == 'Total Excluding Tax on Line Level' and 'Lineitem price' in uploaded_df.columns and 'Discount Amount' in uploaded_df.columns:
+                        
+                        # Calculate Total.. and Amount Exempted.. from Lineitem price - Discount Amount
+                        elif column in ['Total Excluding Tax on Line Level', 'Amount Exempted from Tax/Taxable Amount'] and 'Lineitem price' in uploaded_df.columns and 'Discount Amount' in uploaded_df.columns:
                             mapped_df[column] = uploaded_df['Lineitem price'] - uploaded_df['Discount Amount'].fillna(0)
+                        
                         else:
                             mapped_df[column] = uploaded_df[source_column]
                         break
             else:
-                # Ensure default values are applied correctly
                 mapped_df[column] = default_values.get(column, None)
 
         # Set Original Document Reference Number value as NA based on Document Date
@@ -145,22 +152,18 @@ def upload_file():
         mapped_df[columns_to_fill] = mapped_df.groupby('Document Number')[columns_to_fill].transform(lambda group: group.ffill())
 
 
-        # Ensure output folder exists
         if not os.path.exists(app.config['EXPORTS_FOLDER']):
             os.makedirs(app.config['EXPORTS_FOLDER'])
 
-
-        # Save the mapped data to a new file
         output_filename = f"{os.path.splitext(os.path.basename(cleaned_filepath))[0]}_mapped.xlsx"
         mapped_df.to_excel(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False, engine='openpyxl')
-        # output_filename = f"{os.path.splitext(os.path.basename(cleaned_filepath))[0]}_mapped.csv"
-        # mapped_df.to_csv(os.path.join(app.config['EXPORTS_FOLDER'], output_filename), index=False)
 
         runtime = round(time.time() - start_time, 3)
 
 
         return render_template('index.html', download_url=url_for('download_file', filename=output_filename), runtime=runtime)
     return make_response("<script>alert('Invalid file format. Please upload a .csv file.'); window.location.href='/';</script>")
+
 
 @app.route('/download/<filename>')
 def download_file(filename):
@@ -170,6 +173,7 @@ def download_file(filename):
         return make_response("<script>alert('File not found.'); window.location.href='/';</script>")
 
     return send_file(filepath, as_attachment=True)
+
 
 if __name__ == '__main__':
     if not os.path.exists(app.config['IMPORTS_FOLDER']):
