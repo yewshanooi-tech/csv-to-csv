@@ -109,9 +109,12 @@ def upload_file():
                             if source_column == 'Created at':
                                 mapped_df['Document Date'] = uploaded_df[source_column].str.split(' ').str[0]
                                 mapped_df['Document Time'] = uploaded_df[source_column].str.split(' ').str[1]
-                        # Calculate Subtotal from Lineitem price * Lineitem quantity
-                        elif column in ['Subtotal excluding taxes discounts & charges', 'Total Excluding Tax on Line Level'] and 'Lineitem price' in uploaded_df.columns and 'Lineitem quantity' in uploaded_df.columns:
+                        # Calculate Subtotal.. from Lineitem price * Lineitem quantity
+                        elif column == 'Subtotal excluding taxes discounts & charges' and 'Lineitem price' in uploaded_df.columns and 'Lineitem quantity' in uploaded_df.columns:
                             mapped_df[column] = uploaded_df['Lineitem price'] * uploaded_df['Lineitem quantity']
+                        # Calculate Total.. from Lineitem price - Discount Amount
+                        elif column == 'Total Excluding Tax on Line Level' and 'Lineitem price' in uploaded_df.columns and 'Discount Amount' in uploaded_df.columns:
+                            mapped_df[column] = uploaded_df['Lineitem price'] - uploaded_df['Discount Amount'].fillna(0)
                         else:
                             mapped_df[column] = uploaded_df[source_column]
                         break
