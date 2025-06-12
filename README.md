@@ -1,6 +1,6 @@
 # CSV to XLSX
 
-This project is a Python Flask-based website where users can upload .csv files from Shopify to clean and map relevant columns to a .xlsx file.
+This project is a Python Flask-based website where users can upload .csv files from Shopify to clean and map relevant columns to a .xlsx template file.
 
 ## Setup
 1. Create a virtual environment using `python -m venv .venv`.
