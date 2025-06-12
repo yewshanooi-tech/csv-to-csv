@@ -85,6 +85,7 @@ def upload_file():
 
             "Classification": "008",
             "Tax Type": "E",
+            "Tax Rate": "0%",
             "Tax Amount": "0",
             "Tax Exemption Reason": "Fresh flowers is exempted as per Customs Sales Tax Order 2022",
             "Sales tax exemption certificate number special exemption as per Gazette": "Fresh flowers is exempted as per Customs Sales Tax Order 2022",
@@ -122,7 +123,7 @@ def upload_file():
         if 'Document Type' in mapped_df.columns and 'Document Date' in mapped_df.columns:
             mapped_df['Original Document Reference Number'] = mapped_df['Original Document Reference Number'].fillna('')
             mapped_df.loc[
-                (mapped_df['Document Type'] == 'Refund Note') & (pd.to_datetime(mapped_df['Document Date']) < pd.to_datetime('2025-07-01')),
+                (mapped_df['Document Type'] == 'Refund Note') & (pd.to_datetime(mapped_df['Document Date']) < pd.to_datetime('2024-08-01')),
                 'Original Document Reference Number'
             ] = 'NA'
 
