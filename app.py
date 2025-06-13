@@ -9,18 +9,18 @@ app.config['IMPORTS_FOLDER'] = os.path.join(os.getcwd(), 'data', 'imports')
 app.config['EXPORTS_FOLDER'] = os.path.join(os.getcwd(), 'data', 'exports')
 
 
-def clean_csv(filepath):
+def clean_and_map_csv(filepath):
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
 
     # Replace line separator and paragraph separator with newlines
     content = content.replace("\u2028", "\n").replace("\u2029", "\n")
 
-    cleaned_filepath = f"{os.path.splitext(filepath)[0]}_cleaned.csv"
-    with open(cleaned_filepath, "w", encoding="utf-8") as f:
-        f.write(content)
+    # Read cleaned content directly into a DataFrame
+    from io import StringIO
+    cleaned_df = pd.read_csv(StringIO(content))
 
-    return cleaned_filepath
+    return cleaned_df
 
 
 @app.route('/')
@@ -44,9 +44,8 @@ def upload_file():
 
         start_time = time.time()
 
-        # Clean the uploaded CSV file before mapping
-        cleaned_filepath = clean_csv(filepath)
-        uploaded_df = pd.read_csv(cleaned_filepath)
+        # Clean and map the uploaded CSV file
+        uploaded_df = clean_and_map_csv(filepath)
         columns_df = pd.read_csv(os.path.join('templates', 'columns.csv'))
 
 
@@ -130,6 +129,7 @@ def upload_file():
             else:
                 mapped_df[column] = default_values.get(column, None)
 
+
         # Set Original Document Reference Number value as NA based on Document Date
         if 'Document Type' in mapped_df.columns and 'Document Date' in mapped_df.columns:
             mapped_df['Original Document Reference Number'] = mapped_df['Original Document Reference Number'].fillna('')
@@ -162,7 +162,7 @@ def upload_file():
             for col_idx, value in enumerate(row, start=1):
                 sheet.cell(row=row_idx, column=col_idx, value=value)
 
-        output_filename = f"{os.path.splitext(os.path.basename(cleaned_filepath))[0]}_mapped.xlsx"
+        output_filename = f"{os.path.splitext(os.path.basename(filepath))[0]}_cleaned_mapped.xlsx"
         output_path = os.path.join(app.config['EXPORTS_FOLDER'], output_filename)
         workbook.save(output_path)
 
