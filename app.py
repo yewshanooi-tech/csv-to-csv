@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import time
 import openpyxl
+import argparse
 
 app = Flask(__name__)
 app.config['IMPORTS_FOLDER'] = os.path.join(os.getcwd(), 'data', 'imports')
@@ -183,9 +184,31 @@ def download_file(filename):
     return send_file(filepath, as_attachment=True)
 
 
-if __name__ == '__main__':
-    if not os.path.exists(app.config['IMPORTS_FOLDER']):
-        os.makedirs(app.config['IMPORTS_FOLDER'])
-    if not os.path.exists(app.config['EXPORTS_FOLDER']):
-        os.makedirs(app.config['EXPORTS_FOLDER'])
-    app.run(debug=True)
+def clear_folders():
+    imports_folder = app.config['IMPORTS_FOLDER']
+    exports_folder = app.config['EXPORTS_FOLDER']
+
+    for folder in [imports_folder, exports_folder]:
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run the Flask app or clear folders.")
+    parser.add_argument("--clear", action="store_true", help="Delete files in the exports and imports folders.")
+    args = parser.parse_args()
+
+    if args.clear:
+        clear_folders()
+        print("Successfully deleted files in the exports and imports folders.")
+    else:
+        if not os.path.exists(app.config['EXPORTS_FOLDER']):
+            os.makedirs(app.config['EXPORTS_FOLDER'])
+        if not os.path.exists(app.config['IMPORTS_FOLDER']):
+            os.makedirs(app.config['IMPORTS_FOLDER'])
+        app.run(debug=True)
