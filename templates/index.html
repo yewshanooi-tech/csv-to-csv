@@ -97,13 +97,6 @@
             to { transform: rotate(360deg); }
         }
     </style>
-    <script>
-        function showSpinner() {
-            const button = document.querySelector('form button');
-            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-            button.disabled = true;
-        }
-    </script>
 </head>
 <body>
     <div class="container">
@@ -126,5 +119,12 @@
         </footer>
         {% endif %}
     </div>
+    <script>
+        function showSpinner() {
+            const button = document.querySelector('form button');
+            button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+            button.disabled = true;
+        }
+    </script>
 </body>
 </html>
