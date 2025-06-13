@@ -185,10 +185,10 @@ def download_file(filename):
 
 
 def clear_folders():
-    imports_folder = app.config['IMPORTS_FOLDER']
     exports_folder = app.config['EXPORTS_FOLDER']
+    imports_folder = app.config['IMPORTS_FOLDER']
 
-    for folder in [imports_folder, exports_folder]:
+    for folder in [exports_folder, imports_folder]:
         for filename in os.listdir(folder):
             file_path = os.path.join(folder, filename)
             try:
