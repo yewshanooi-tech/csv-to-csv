@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, url_for, make_response, send_file
+from io import StringIO
 import os
 import pandas as pd
 import time
@@ -16,8 +17,7 @@ def clean_and_map_csv(filepath):
     # Replace line separator and paragraph separator with newlines
     content = content.replace("\u2028", "\n").replace("\u2029", "\n")
 
-    # Read cleaned content directly into a DataFrame
-    from io import StringIO
+    # Read cleaned content directly into a data frame
     cleaned_df = pd.read_csv(StringIO(content))
 
     return cleaned_df
