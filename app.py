@@ -87,6 +87,7 @@ def upload_file():
             "Supplier's Contact Number": "+60162992263",
 
             "Classification": "008",
+            "Unit of Measurement": "EA",
             "Tax Type": "E",
             "Tax Rate": "0%",
             "Tax Amount": "0",
@@ -188,4 +189,4 @@ if __name__ == '__main__':
         os.makedirs(app.config['IMPORTS_FOLDER'])
     if not os.path.exists(app.config['EXPORTS_FOLDER']):
         os.makedirs(app.config['EXPORTS_FOLDER'])
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
