@@ -1,4 +1,4 @@
-# CSV to XLSX
+# B2C Sales Report Converter
 
 This project is a Python Flask-based website where users can upload .csv files from Shopify to clean and map relevant columns to a .xlsx template file.
 
