@@ -3,6 +3,8 @@ import os
 import pandas as pd
 import time
 import openpyxl
+import argparse
+import shutil
 
 app = Flask(__name__)
 app.config['IMPORTS_FOLDER'] = os.path.join(os.getcwd(), 'data', 'imports')
@@ -184,9 +186,25 @@ def download_file(filename):
     return send_file(filepath, as_attachment=True)
 
 
+def clear_folder(folder_path):
+    """Clear all files in the given folder."""
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
+    os.makedirs(folder_path)
+
+
 if __name__ == '__main__':
-    if not os.path.exists(app.config['IMPORTS_FOLDER']):
-        os.makedirs(app.config['IMPORTS_FOLDER'])
-    if not os.path.exists(app.config['EXPORTS_FOLDER']):
-        os.makedirs(app.config['EXPORTS_FOLDER'])
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    parser = argparse.ArgumentParser(description='Run the Flask app.')
+    parser.add_argument('--delete', action='store_true', help='Clear files in the exports and imports folders.')
+    args = parser.parse_args()
+
+    if args.delete:
+        clear_folder(app.config['IMPORTS_FOLDER'])
+        clear_folder(app.config['EXPORTS_FOLDER'])
+        print("Cleared imports and exports folders.")
+    else:
+        if not os.path.exists(app.config['IMPORTS_FOLDER']):
+            os.makedirs(app.config['IMPORTS_FOLDER'])
+        if not os.path.exists(app.config['EXPORTS_FOLDER']):
+            os.makedirs(app.config['EXPORTS_FOLDER'])
+        app.run(host='0.0.0.0', port=5000, debug=True)
